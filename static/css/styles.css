@@ -1,15 +1,39 @@
 /* Custom styles */
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #818cf8;
+    --accent-color: #4f46e5;
+    --background-color: #f3f4f6;
+    --text-color: #1f2937;
+    --light-text-color: #4b5563;
+}
+
 body {
     font-family: 'Inter', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 .container {
     max-width: 800px;
 }
 
+h1 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+h2 {
+    color: var(--accent-color);
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
 #meditationScript {
     line-height: 1.8;
     font-size: 1.1rem;
+    color: var(--light-text-color);
 }
 
 /* Audio player styling */
@@ -17,7 +41,7 @@ audio {
     width: 100%;
     margin-top: 1rem;
     border-radius: 0.5rem;
-    background-color: #f3f4f6;
+    background-color: var(--secondary-color);
 }
 
 /* Animation for loading indicator */
@@ -34,6 +58,7 @@ audio {
 /* Custom button styles */
 button {
     transition: all 0.3s ease;
+    font-weight: 600;
 }
 
 button:hover {
@@ -65,4 +90,82 @@ button:active {
 /* Transition effect for border color change */
 #emotionContainer, #goalContainer, #outcomeContainer {
     transition: border-color 0.3s ease-in-out;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* Fade-in animation for meditation script */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+#scriptDisplay {
+    animation: fadeIn 0.5s ease-in-out;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Pulse animation for generate button */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+    }
+}
+
+#generateButton:not(:disabled) {
+    animation: pulse 2s infinite;
+    background-color: var(--primary-color);
+}
+
+#generateButton:disabled {
+    background-color: var(--light-text-color);
+    cursor: not-allowed;
+}
+
+/* Tag styles */
+.tag {
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.tag:hover {
+    transform: translateY(-1px);
+}
+
+.tag.selected {
+    color: white;
+}
+
+/* Error message styles */
+#errorMessage {
+    background-color: #fee2e2;
+    border-color: #ef4444;
 }

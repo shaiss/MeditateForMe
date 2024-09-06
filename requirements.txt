@@ -8,3 +8,5 @@ python-dotenv==0.19.2
 Werkzeug==2.0.2
 Flask-WTF
 WTForms
+streamlit==1.38.0
+streamlit-shadcn-ui==0.1.18
