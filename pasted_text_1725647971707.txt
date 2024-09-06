@@ -1,0 +1,430 @@
+Meditate for Me - Production Specification Document
+1. Project Overview
+Meditate for Me is a web application that generates personalized meditation scripts and audio using AI technology. The application consists of a React frontend and a Node.js backend, utilizing OpenAI's GPT-4 and ElevenLabs' text-to-speech API for content generation.
+2. Architecture
+2.1 Frontend
+Framework: React
+Main components:
+EmotionSelector
+ScriptCreation
+AudioMeditation
+2.2 Backend
+Framework: Express.js
+Key services:
+Script generation
+Audio generation
+2.3 APIs
+OpenAI API for script generation
+ElevenLabs API for text-to-speech conversion
+3. Frontend Specifications
+3.1 Main Application Flow
+The main application flow is defined in the App component:
+function App() {
+  const [step, setStep] = useState(1);
+  const [meditationData, setMeditationData] = useState({});
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleEmotionSubmit = (data) => {
+    setMeditationData(data);
+    setStep(2);
+  };
+
+  const handleScriptSave = (script) => {
+    setMeditationData(prev => ({ ...prev, script }));
+    setStep(3);
+  };
+
+  return (
+    <div className="App">
+      {error && <ErrorMessage message={error} onClose={() => setError(null)} />}
+      {isLoading && <LoadingSpinner />}
+      {step === 1 && <EmotionSelector onSubmit={handleEmotionSubmit} />}
+      {step === 2 && <ScriptCreation 
+        meditationData={meditationData} 
+        onBack={() => setStep(1)} 
+        onSave={handleScriptSave} 
+      />}
+      {step === 3 && <AudioMeditation 
+        meditationData={meditationData} 
+        onBack={() => setStep(2)} 
+      />}
+    </div>
+  );
+}
+3.2 Emotion Selection
+Implement the EmotionSelector component with the following features:
+Emotion wheel for visual selection
+Multiple emotion selection
+Goal and outcome toggles
+Reference the existing implementation:
+function EmotionSelector({ onSubmit }) {
+  const [selectedEmotions, setSelectedEmotions] = useState([]);
+  const [goals, setGoals] = useState([]);
+  const [outcomes, setOutcomes] = useState([]);
+
+  const handleEmotionSelect = (emotion) => {
+    setSelectedEmotions(prev => {
+      if (prev.includes(emotion)) {
+        return prev.filter(e => e !== emotion);
+      } else {
+        return [...prev, emotion];
+      }
+    });
+  };
+
+  const handleToggle = (item, setter) => {
+    setter(prev => {
+      if (prev.includes(item)) {
+        return prev.filter(i => i !== item);
+      } else {
+        return [...prev, item];
+      }
+    });
+  };
+
+  const handleSubmit = () => {
+    onSubmit({ emotions: selectedEmotions, goals, outcomes });
+  };
+
+  return (
+    <div className="emotion-selector">
+      <h1>Meditate for Me</h1>
+      <h2>Select Your Current Emotions</h2>
+      <div className="emotion-wheel-container">
+        <EmotionWheel onSelect={handleEmotionSelect} selectedEmotions={selectedEmotions} />
+      </div>
+      <div className="selected-emotions">
+        {selectedEmotions.map(emotion => (
+          <span key={emotion} className="emotion-tag">{emotion}</span>
+        ))}
+      </div>
+      <div className="options-container">
+        <div className="goals-section">
+          <h3>Meditation Goals</h3>
+          {['Relaxation', 'Focus', 'Better Sleep'].map(goal => (
+            <label key={goal} className="toggle-switch">
+              <input 
+                type="checkbox" 
+                checked={goals.includes(goal)}
+                onChange={() => handleToggle(goal, setGoals)} 
+              />
+              <span className="slider"></span>
+              {goal}
+            </label>
+          ))}
+        </div>
+        <div className="outcomes-section">
+          <h3>Desired Outcomes</h3>
+          {['Feeling Calm', 'Increased Energy', 'Mental Clarity'].map(outcome => (
+            <label key={outcome} className="toggle-switch">
+              <input 
+                type="checkbox" 
+                checked={outcomes.includes(outcome)}
+                onChange={() => handleToggle(outcome, setOutcomes)} 
+              />
+              <span className="slider"></span>
+              {outcome}
+            </label>
+          ))}
+        </div>
+      </div>
+      <button className="submit-button" onClick={handleSubmit}>CREATE MEDITATION</button>
+    </div>
+  );
+}
+3.3 Script Creation
+Implement the ScriptCreation component with the following features:
+Display generated meditation script
+Option to regenerate script
+Progress to audio generation
+Reference the existing implementation:
+function ScriptCreation({ meditationData, onBack, onSave }) {
+  const [script, setScript] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchScript = async () => {
+      setIsLoading(true);
+      try {
+        const generatedScript = await generateMeditationScript(meditationData);
+        setScript(generatedScript);
+      } catch (error) {
+        console.error('Error generating script:', error);
+        setError('Failed to generate meditation script. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchScript();
+  }, [meditationData]);
+
+  const handleGenerateAudio = () => {
+    onSave(script);
+  };
+
+  return (
+    <div className="script-creation">
+      <h1>Meditate for Me</h1>
+      <button className="back-button" onClick={onBack}>BACK</button>
+      <h2>Your Personalized Meditation Script</h2>
+      {isLoading ? (
+        <LoadingSpinner message="Generating your meditation script..." />
+      ) : error ? (
+        <p className="error-message">{error}</p>
+      ) : (
+        <>
+          <div className="script-container">
+            <p className="meditation-script">{script}</p>
+          </div>
+          <button className="generate-audio-button" onClick={handleGenerateAudio}>
+            Generate Audio Meditation
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+3.4 Audio Meditation
+Implement the AudioMeditation component with the following features:
+Display generated script
+Audio player controls
+Options to save and share meditation
+Reference the existing implementation:
+function AudioMeditation({ meditationData, onBack }) {
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const audioRef = useRef(null);
+
+  const generateAudioCallback = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await generateAudio(meditationData.script);
+      setAudioUrl(response.audioUrl);
+    } catch (err) {
+      console.error('Error generating audio:', err);
+      setError(err.message || 'An error occurred while generating the audio.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [meditationData.script]);
+
+  useEffect(() => {
+    generateAudioCallback();
+  }, [generateAudioCallback]);
+
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleSave = () => {
+    // TODO: Implement save functionality
+    console.log("Saving meditation...");
+  };
+
+  const handleShare = () => {
+    // TODO: Implement share functionality
+    console.log("Sharing meditation...");
+  };
+  return (
+    <div className="audio-meditation">
+      <h1>Meditate for Me</h1>
+      <button className="back-button" onClick={onBack}>
+        BACK
+      </button>
+      <h2>Personalized Meditation</h2>
+      <p>Your selected script:</p>
+      <textarea value={meditationData.script} readOnly />
+      {isLoading ? (
+        <LoadingSpinner message="Generating your meditation audio..." />
+      ) : error ? (
+        <div className="error-container">
+          <p className="error-message">{error}</p>
+          <button className="retry-button" onClick={generateAudioCallback}>Retry</button>
+        </div>
+      ) : (
+        <div className="audio-controls">
+          <audio ref={audioRef} src={audioUrl} />
+          <button onClick={togglePlayPause}>
+            {isPlaying ? "PAUSE" : "PLAY"}
+          </button>
+          <input type="range" min="0" max="100" value="0" />
+          {/* TODO: Implement actual audio playback */}
+        </div>
+      )}
+      <div className="button-group">
+        <button className="save-button" onClick={handleSave}>
+          SAVE
+        </button>
+        <button className="share-button" onClick={handleShare}>
+          SHARE
+        </button>
+      </div>
+    </div>
+  );
+}
+3.5 Styling
+Use CSS modules for component-specific styling. Maintain a consistent color scheme and design language across the application.
+4. Backend Specifications
+4.1 Server Setup
+Set up the Express server with necessary middleware and error handling:
+require('dotenv').config();
+
+const express = require('express');
+const cors = require('cors');
+const meditationRoutes = require('./routes/meditationRoutes');
+const errorHandler = require('./utils/errorHandler');
+
+const app = express();
+const PORT = process.env.BACKEND_PORT;
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
+
+app.use(express.json());
+app.use(express.static('public'));
+
+app.use('/api', meditationRoutes);
+
+app.use(errorHandler);
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// At the end of src/server.js
+module.exports = app;
+4.2 Meditation Routes
+Implement the following API endpoints:
+POST /api/generate-meditation
+POST /api/generate-audio
+Reference the existing implementation:
+const express = require("express");
+const meditationController = require("../controllers/meditationController");
+
+const router = express.Router();
+
+router.post("/generate-meditation", meditationController.generateMeditation);
+router.post("/generate-audio", meditationController.generateAudio);
+
+module.exports = router;
+4.3 Script Generation Service
+Implement script generation using OpenAI's GPT-4 API:
+require('dotenv').config();
+const OpenAI = require('openai');
+const axios = require('axios');
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const modelConfigs = {
+  'gpt-4o': {
+    provider: 'openai',
+    maxTokens: 1024,
+    temperature: 0.7,
+  },
+  'claude-3-opus-20240229': {
+    provider: 'anthropic',
+    maxTokens: 1024,
+    temperature: 0.7,
+  },
+};
+
+const DEFAULT_MODEL = 'gpt-4o';
+
+const generatePrompt = (goals, emotions, type) => {
+  return `Create a meditation script for ${goals}, addressing ${emotions}, in the style of ${type}. The script should be supportive, and guide the listener through a mindful experience. 
+  
+Start with a warm welcome message about the purpose about the meditation.
+
+Output Rules:
+1: Output the script.  
+2: No instructions.`;
+};
+
+const modelProviders = {
+  openai: async (prompt, model, config) => {
+    const response = await openai.chat.completions.create({
+      model: model,
+      messages: [
+        {"role": "system", "content": "You are a Wellness Coach specializing in creating meditation scripts."},
+        {"role": "user", "content": prompt}
+      ],
+      max_tokens: config.maxTokens,
+      temperature: config.temperature,
+    });
+    return response.choices[0].message.content.trim();
+  },
+  anthropic: async (prompt, model, config) => {
+    const data = JSON.stringify({
+      model: model,
+      max_tokens: config.maxTokens,
+      messages: [
+        {
+          "role": "user",
+          "content": prompt
+        }
+      ],
+      temperature: config.temperature,
+    });
+
+    const axiosConfig = {
+      method: 'post',
+      url: 'https://api.anthropic.com/v1/messages',
+      headers: { 
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json'
+      },
+      data: data
+    };
+
+    try {
+      const response = await axios(axiosConfig);
+      return response.data.content[0].text.trim();
+    } catch (error) {
+      console.error('Error calling Anthropic API:', error);
+      throw error;
+    }
+  },
+};
+exports.generateScript = async (goals, emotions, type, model = DEFAULT_MODEL) => {
+  const config = modelConfigs[model];
+  if (!config) {
+    throw new Error(`Unsupported model: ${model}`);
+  }
+
+  const prompt = generatePrompt(goals, emotions, type);
+  const provider = modelProviders[config.provider];
+
+  if (!provider) {
+    throw new Error(`Unsupported provider: ${config.provider}`);
+  }
+
+  try {
+    return await provider(prompt, model, config);
+  } catch (error) {
+    console.error(`Error generating script with ${model}:`, error);
+    throw new Error(`Failed to generate script with ${model}`);
+  }
+};
+
+Key features:
+Support for multiple AI models (GPT-4 and Claude)
+Customizable prompt generation
+Error handling and retries
+4.4 Audio Generation Service
+Implement audio generation using ElevenLabs' API:
