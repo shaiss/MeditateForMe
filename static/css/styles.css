@@ -1,0 +1,68 @@
+/* Custom styles */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.container {
+    max-width: 800px;
+}
+
+#meditationScript {
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+/* Audio player styling */
+audio {
+    width: 100%;
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    background-color: #f3f4f6;
+}
+
+/* Animation for loading indicator */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Custom button styles */
+button {
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Transition effect for border color change */
+#emotionContainer, #goalContainer, #outcomeContainer {
+    transition: border-color 0.3s ease-in-out;
+}

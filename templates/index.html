@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meditate for Me</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@shadcn/ui@0.0.1/dist/index.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="container max-w-3xl mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Meditate for Me</h1>
+        
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">How to Use</h2>
+            <ol class="list-decimal list-inside space-y-2 text-gray-600">
+                <li>Select one or more emotions that reflect your current state.</li>
+                <li>Choose your meditation goals.</li>
+                <li>Pick your desired outcomes from the meditation.</li>
+                <li>Click the "Generate Meditation" button to create your personalized meditation.</li>
+                <li>Listen to your custom meditation audio or read the script.</li>
+            </ol>
+        </div>
+        
+        <div class="space-y-6">
+            <div id="emotionContainer" class="bg-white shadow-lg rounded-lg p-6 border-2 border-transparent">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Select Your Current Emotions</h2>
+                <div id="emotionSelector" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <div id="goalContainer" class="bg-white shadow-lg rounded-lg p-6 border-2 border-transparent">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Select Your Meditation Goals</h2>
+                <div id="goalSelector" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <div id="outcomeContainer" class="bg-white shadow-lg rounded-lg p-6 border-2 border-transparent">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Select Your Desired Outcomes</h2>
+                <div id="outcomeSelector" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <p id="selectionInstructions" class="text-red-500 font-semibold mt-4 hidden"></p>
+
+            <button id="generateButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                Generate Meditation
+            </button>
+
+            <div id="loadingIndicator" class="hidden">
+                <div class="flex items-center justify-center">
+                    <svg class="animate-spin h-8 w-8 mr-3 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-lg font-semibold text-gray-700">Generating meditation...</span>
+                </div>
+            </div>
+
+            <div id="errorMessage" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
+                <p class="font-bold">Error</p>
+                <p></p>
+            </div>
+
+            <div id="scriptDisplay" class="hidden bg-white shadow-lg rounded-lg p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Your Personalized Meditation Script</h2>
+                <p id="meditationScript" class="whitespace-pre-wrap text-gray-600 leading-relaxed"></p>
+            </div>
+
+            <audio id="audioPlayer" controls class="hidden w-full mt-6"></audio>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
