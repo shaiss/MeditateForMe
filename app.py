@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask_sqlalchemy import SQLAlchemy
 from models import db, Meditation
 from services.script_generator import generate_script
 from services.audio_generator import generate_audio
@@ -43,12 +44,22 @@ def generate_meditation():
     goals = data.get('goals', [])
     outcomes = data.get('outcomes', [])
 
-    if not emotions or not goals or not outcomes:
-        return jsonify({'error': 'Please provide at least one emotion, goal, and outcome.'}), 400
+    # Improved validation
+    if not emotions:
+        return jsonify({'error': 'Please provide at least one emotion.'}), 400
+    if not goals:
+        return jsonify({'error': 'Please provide at least one goal.'}), 400
+    if not outcomes:
+        return jsonify({'error': 'Please provide at least one desired outcome.'}), 400
 
     try:
+        app.logger.info(f"Generating script with emotions: {emotions}, goals: {goals}, outcomes: {outcomes}")
         script = generate_script(goals, emotions, outcomes)
+        app.logger.info("Script generated successfully")
+        
+        app.logger.info("Generating audio")
         audio_url = generate_audio(script)
+        app.logger.info("Audio generated successfully")
 
         meditation = Meditation(script=script, audio_url=audio_url)
         db.session.add(meditation)

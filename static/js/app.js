@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tag.classList.add(...baseClass.split(' '), 'transition', 'duration-300', 'ease-in-out', 'transform', 'hover:scale-105');
             tag.textContent = item;
             tag.addEventListener('click', () => {
+                tag.classList.toggle('selected');
                 tag.classList.toggle('bg-blue-500');
                 tag.classList.toggle('text-white');
                 validateSelections();
@@ -32,9 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
     createTags(outcomes, 'outcomeSelector', 'px-4 py-2 rounded-full border-2 border-purple-500 text-purple-500 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50');
 
     function validateSelections() {
-        const selectedEmotions = document.querySelectorAll('#emotionSelector button.bg-blue-500');
-        const selectedGoals = document.querySelectorAll('#goalSelector button.bg-blue-500');
-        const selectedOutcomes = document.querySelectorAll('#outcomeSelector button.bg-blue-500');
+        const selectedEmotions = document.querySelectorAll('#emotionSelector button.selected');
+        const selectedGoals = document.querySelectorAll('#goalSelector button.selected');
+        const selectedOutcomes = document.querySelectorAll('#outcomeSelector button.selected');
 
         const emotionContainer = document.getElementById('emotionContainer');
         const goalContainer = document.getElementById('goalContainer');
@@ -69,9 +70,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const selectedEmotions = [...document.querySelectorAll('#emotionSelector button.bg-blue-500')].map(tag => tag.textContent);
-        const selectedGoals = [...document.querySelectorAll('#goalSelector button.bg-green-500')].map(tag => tag.textContent);
-        const selectedOutcomes = [...document.querySelectorAll('#outcomeSelector button.bg-purple-500')].map(tag => tag.textContent);
+        const selectedEmotions = [...document.querySelectorAll('#emotionSelector button.selected')].map(tag => tag.textContent);
+        const selectedGoals = [...document.querySelectorAll('#goalSelector button.selected')].map(tag => tag.textContent);
+        const selectedOutcomes = [...document.querySelectorAll('#outcomeSelector button.selected')].map(tag => tag.textContent);
 
         showLoading(true);
         hideError();
@@ -90,7 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to generate meditation');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate meditation');
             }
 
             const data = await response.json();
