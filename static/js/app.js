@@ -33,39 +33,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateSelections() {
         const selectedEmotions = document.querySelectorAll('#emotionSelector button.bg-blue-500');
-        const selectedGoals = document.querySelectorAll('#goalSelector button.bg-green-500');
-        const selectedOutcomes = document.querySelectorAll('#outcomeSelector button.bg-purple-500');
+        const selectedGoals = document.querySelectorAll('#goalSelector button.bg-blue-500');
+        const selectedOutcomes = document.querySelectorAll('#outcomeSelector button.bg-blue-500');
 
         const emotionContainer = document.getElementById('emotionContainer');
         const goalContainer = document.getElementById('goalContainer');
         const outcomeContainer = document.getElementById('outcomeContainer');
 
+        const isValid = selectedEmotions.length > 0 && selectedGoals.length > 0 && selectedOutcomes.length > 0;
+
         emotionContainer.classList.toggle('border-red-500', selectedEmotions.length === 0);
         goalContainer.classList.toggle('border-red-500', selectedGoals.length === 0);
         outcomeContainer.classList.toggle('border-red-500', selectedOutcomes.length === 0);
 
-        generateButton.disabled = selectedEmotions.length === 0 || selectedGoals.length === 0 || selectedOutcomes.length === 0;
-        generateButton.classList.toggle('opacity-50', generateButton.disabled);
-        generateButton.classList.toggle('cursor-not-allowed', generateButton.disabled);
+        generateButton.disabled = !isValid;
+        generateButton.classList.toggle('opacity-50', !isValid);
+        generateButton.classList.toggle('cursor-not-allowed', !isValid);
+        generateButton.classList.toggle('bg-blue-500', isValid);
+        generateButton.classList.toggle('bg-gray-400', !isValid);
 
         const instructions = document.getElementById('selectionInstructions');
-        if (generateButton.disabled) {
+        if (!isValid) {
             instructions.textContent = 'Please select at least one option from each category to enable the Generate Meditation button.';
             instructions.classList.remove('hidden');
         } else {
             instructions.classList.add('hidden');
         }
+
+        return isValid;
     }
 
     generateButton.addEventListener('click', async () => {
-        const selectedEmotions = [...document.querySelectorAll('#emotionSelector button.bg-blue-500')].map(tag => tag.textContent);
-        const selectedGoals = [...document.querySelectorAll('#goalSelector button.bg-green-500')].map(tag => tag.textContent);
-        const selectedOutcomes = [...document.querySelectorAll('#outcomeSelector button.bg-purple-500')].map(tag => tag.textContent);
-
-        if (selectedEmotions.length === 0 || selectedGoals.length === 0 || selectedOutcomes.length === 0) {
+        if (!validateSelections()) {
             showError('Please select at least one emotion, goal, and outcome.');
             return;
         }
+
+        const selectedEmotions = [...document.querySelectorAll('#emotionSelector button.bg-blue-500')].map(tag => tag.textContent);
+        const selectedGoals = [...document.querySelectorAll('#goalSelector button.bg-green-500')].map(tag => tag.textContent);
+        const selectedOutcomes = [...document.querySelectorAll('#outcomeSelector button.bg-purple-500')].map(tag => tag.textContent);
 
         showLoading(true);
         hideError();
