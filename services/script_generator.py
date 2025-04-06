@@ -41,12 +41,12 @@ def generate_script(goals, emotions, outcomes):
         # Try to create completion with extended timeout and error handling
         try:
             response = client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "You are a Wellness Coach specializing in creating meditation scripts."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=500,
+                max_tokens=1000,
                 temperature=0.7,
                 timeout=60,  # Extended timeout for API call
             )

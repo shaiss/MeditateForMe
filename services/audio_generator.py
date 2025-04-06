@@ -36,10 +36,10 @@ def generate_audio(text):
 
     data = {
         "text": text,
-        "model_id": "eleven_monolingual_v1",
+        "model_id": "eleven_monolingual_v2",
         "voice_settings": {
-            "stability": 0.5,
-            "similarity_boost": 0.5
+            "stability": 0.7,
+            "similarity_boost": 0.65
         }
     }
 
