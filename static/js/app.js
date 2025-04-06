@@ -75,6 +75,12 @@ document.addEventListener('DOMContentLoaded', function() {
         hideError();
 
         try {
+            console.log('Sending meditation request with:',
+                'Emotions:', selectedEmotions,
+                'Goals:', selectedGoals,
+                'Outcomes:', selectedOutcomes
+            );
+            
             const response = await fetch('/api/generate-meditation', {
                 method: 'POST',
                 headers: {
@@ -87,16 +93,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 }),
             });
 
+            const data = await response.json();
+            
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to generate meditation');
+                let errorMessage = 'Failed to generate meditation';
+                
+                if (data.error) {
+                    errorMessage = data.error;
+                } else if (data.message) {
+                    errorMessage = data.message;
+                }
+                
+                if (data.validation_errors) {
+                    errorMessage = 'Please fix the following issues: ' + data.validation_errors.join(' ');
+                }
+                
+                console.error('API Error:', data);
+                throw new Error(errorMessage);
             }
 
-            const data = await response.json();
+            console.log('Meditation generated successfully:', data);
             displayMeditation(data);
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error generating meditation:', error);
             showError('An error occurred: ' + error.message);
+            
+            // Add retry button if it's a server error
+            if (error.message.includes('server') || error.message.includes('unexpected')) {
+                addRetryButton();
+            }
         } finally {
             showLoading(false);
         }
@@ -115,6 +140,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function hideError() {
         errorMessage.classList.add('hidden');
+        // Remove retry button if it exists
+        const retryButton = document.getElementById('retryButton');
+        if (retryButton) {
+            retryButton.remove();
+        }
+    }
+
+    function addRetryButton() {
+        // Remove existing retry button if present
+        const existingButton = document.getElementById('retryButton');
+        if (existingButton) {
+            existingButton.remove();
+        }
+        
+        // Create new retry button
+        const retryButton = document.createElement('button');
+        retryButton.id = 'retryButton';
+        retryButton.classList.add(
+            'mt-4', 'bg-green-500', 'hover:bg-green-600', 'text-white',
+            'font-bold', 'py-2', 'px-4', 'rounded-lg', 'transition',
+            'duration-300', 'ease-in-out', 'focus:outline-none',
+            'focus:ring-2', 'focus:ring-green-500', 'focus:ring-opacity-50'
+        );
+        retryButton.textContent = 'Try Again';
+        retryButton.addEventListener('click', () => {
+            hideError();
+            generateButton.click();
+        });
+        
+        // Append to error message
+        errorMessage.appendChild(retryButton);
     }
 
     function displayMeditation(data) {

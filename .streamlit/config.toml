@@ -1,4 +1,6 @@
 [server]
-port = 8501
+port = 5000
 enableCORS = true
 enableXsrfProtection = true
+headless = true
+address = "0.0.0.0"

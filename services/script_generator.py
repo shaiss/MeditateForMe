@@ -37,26 +37,62 @@ def generate_script(goals, emotions, outcomes):
     try:
         logger.info(f"Generating script for goals: {goals}, emotions: {emotions}, outcomes: {outcomes}")
         client = get_openai_client()
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a Wellness Coach specializing in creating meditation scripts."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=500,
-            temperature=0.7,
-        )
-        script = response.choices[0].message.content.strip()
-        logger.info("Script generated successfully")
-        return script
-    except Exception as e:
-        log_error = f"Error generating script: {e}"
+        
+        # Try to create completion with extended timeout and error handling
         try:
-            # Try to log to Flask if in context
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a Wellness Coach specializing in creating meditation scripts."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=500,
+                temperature=0.7,
+                timeout=60,  # Extended timeout for API call
+            )
+            script = response.choices[0].message.content.strip()
+            logger.info("Script generated successfully")
+            return script
+        except Exception as api_error:
+            # Handle specific OpenAI API errors
+            error_message = str(api_error)
+            logger.error(f"OpenAI API error: {error_message}")
+            
+            if "rate limit" in error_message.lower():
+                raise RuntimeError("Our meditation service is experiencing high demand. Please try again in a few minutes.")
+            elif "timeout" in error_message.lower():
+                raise RuntimeError("The request to our meditation service timed out. Please try again.")
+            elif "token" in error_message.lower() and "maximum" in error_message.lower():
+                raise RuntimeError("The meditation couldn't be generated due to complexity limits. Please try with fewer selections.")
+            else:
+                # Re-raise with more context
+                raise RuntimeError(f"Problem generating meditation script: {error_message}")
+                
+    except ValueError as e:
+        # Handle configuration/setup errors
+        log_error = f"Configuration error in script generation: {e}"
+        try:
             current_app.logger.error(log_error)
         except RuntimeError:
-            # Not in Flask context, use regular logger
+            logger.error(log_error)
+        raise ValueError(f"Meditation service configuration error: {str(e)}")
+        
+    except RuntimeError as e:
+        # Pass through runtime errors with logging
+        log_error = f"Runtime error in script generation: {e}"
+        try:
+            current_app.logger.error(log_error)
+        except RuntimeError:
+            logger.error(log_error)
+        raise
+        
+    except Exception as e:
+        # Handle unexpected errors
+        log_error = f"Unexpected error generating script: {e}"
+        try:
+            current_app.logger.error(log_error)
+        except RuntimeError:
             logger.error(log_error)
         
-        # Re-raise the exception to be handled by caller
-        raise
+        # Raise a more user-friendly error
+        raise RuntimeError("An unexpected error occurred while creating your meditation script. Please try again later.")
