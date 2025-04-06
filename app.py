@@ -146,7 +146,21 @@ def get_meditation(meditation_id):
 def serve_audio(filename):
     return send_from_directory('static/audio', filename)
 
+@app.route('/api/reset-db', methods=['POST'])
+def reset_db():
+    """Reset the database (development only)"""
+    try:
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
+        app.logger.info("Database reset successfully")
+        return jsonify({'message': 'Database reset successfully'}), 200
+    except Exception as e:
+        app.logger.error(f"Error resetting database: {str(e)}")
+        return jsonify({'error': f"Error resetting database: {str(e)}"}), 500
+
 if __name__ == '__main__':
     with app.app_context():
+        # Just create tables that don't exist yet
         db.create_all()
     app.run(host='0.0.0.0', port=5000)
