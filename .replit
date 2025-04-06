@@ -17,7 +17,11 @@ args = "Flask App"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Streamlit App"
+args = "TailwindCSS Build"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Streamlit Test App"
 
 [[workflows.workflow]]
 name = "Flask App"
@@ -32,15 +36,32 @@ args = "python app.py"
 waitForPort = 5000
 
 [[workflows.workflow]]
-name = "Streamlit App"
+name = "TailwindCSS Build"
 author = "agent"
 
 [workflows.workflow.metadata]
 agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "streamlit run streamlit_app.py"
+args = "./build-tailwind.sh"
+
+[[workflows.workflow]]
+name = "Streamlit Test App"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "streamlit run simple_streamlit_app.py --server.address=0.0.0.0 --server.port=8501"
 waitForPort = 8501
 
 [deployment]
