@@ -92,17 +92,30 @@ def generate_meditation():
         audio_url = generate_audio(script)
         app.logger.info("Audio generated successfully")
 
-        # Create and store unique meditation
-        meditation = Meditation(script=script, audio_url=audio_url)
+        # Create meditation with all metadata
+        meditation = Meditation(
+            script=script, 
+            audio_url=audio_url,
+            # Approximate duration (1 word = ~0.4 seconds in spoken audio)
+            duration_seconds=int(len(script.split()) * 0.4)
+        )
+        
+        # Store selection metadata
+        meditation.set_emotions(emotions)
+        meditation.set_goals(goals)
+        meditation.set_outcomes(outcomes)
+        
+        # Generate a title based on selections
+        emotion_str = emotions[0] if emotions else "Calm"
+        goal_str = goals[0] if goals else "Mindfulness"
+        meditation.title = f"{emotion_str} {goal_str} Meditation"
+        
         db.session.add(meditation)
         db.session.commit()
         app.logger.info(f"Meditation saved to database with ID: {meditation.id}")
 
-        return jsonify({
-            'id': meditation.id,
-            'script': script,
-            'audio_url': audio_url
-        }), 201
+        # Use the to_dict method to create a consistent response
+        return jsonify(meditation.to_dict()), 201
     except ValueError as e:
         app.logger.error(f"Value error in generate_meditation: {str(e)}")
         return jsonify({
@@ -127,11 +140,7 @@ def generate_meditation():
 @app.route('/api/meditation/<int:meditation_id>', methods=['GET'])
 def get_meditation(meditation_id):
     meditation = Meditation.query.get_or_404(meditation_id)
-    return jsonify({
-        'id': meditation.id,
-        'script': meditation.script,
-        'audio_url': meditation.audio_url
-    })
+    return jsonify(meditation.to_dict())
 
 @app.route('/static/audio/<path:filename>')
 def serve_audio(filename):

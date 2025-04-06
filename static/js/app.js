@@ -174,10 +174,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayMeditation(data) {
+        // Display the script
         document.getElementById('meditationScript').textContent = data.script;
+        
+        // Display title if available
+        const titleElement = document.getElementById('meditationTitle');
+        if (titleElement && data.title) {
+            titleElement.textContent = data.title;
+            titleElement.classList.remove('hidden');
+        }
+        
+        // Display duration if available
+        const durationElement = document.getElementById('meditationDuration');
+        if (durationElement && data.duration_seconds) {
+            const minutes = Math.floor(data.duration_seconds / 60);
+            const seconds = data.duration_seconds % 60;
+            durationElement.textContent = `Duration: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            durationElement.classList.remove('hidden');
+        }
+        
+        // Set audio source
         audioPlayer.src = data.audio_url;
+        
+        // Show containers
         scriptDisplay.classList.remove('hidden');
         audioPlayerContainer.classList.remove('hidden');
+        
+        // Scroll to results
         scriptDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
